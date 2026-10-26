@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String          @id @default(cuid())
+  name         String
+  email        String          @unique
+  password     String
+  company      String
+  phone            String?
+  planInterest     String   @default("pro")
+  role             String   @default("client")
+  status           String   @default("pendiente")
+  subdomain        String   @default("")
+  platformUser     String   @default("")
+  platformPassword String   @default("")
+  createdAt        DateTime @default(now())
+  invoices     Invoice[]
+  profile      CompanyProfile?
+}
+
+model CompanyProfile {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nit       String   @default("")
+  tradeName String   @default("")
+  city      String   @default("")
+  address   String   @default("")
+  updatedAt DateTime @updatedAt
+}
+
+model Invoice {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  number    String
+  customer  String
+  total     Int
+  status    String
+  issuedAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  company   String?
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model Plan {
+  id              String   @id
+  name            String
+  audience        String
+  monthlyPrice    Int
+  semiannualPrice Int
+  semiannualTotal Int
+  annualPrice     Int
+  annualTotal     Int
+  popular         Boolean  @default(false)
+  features        String[]
+  cta             String
+  sortOrder       Int
+}
+
+model Testimonial {
+  id        String @id
+  quote     String
+  name      String
+  role      String
+  city      String
+  sortOrder Int
+}
+
+model Faq {
+  id        String @id
+  question  String
+  answer    String
+  sortOrder Int
+}
+
+model Post {
+  slug        String   @id
+  title       String
+  excerpt     String
+  content     String
+  category    String
+  publishedAt DateTime
+}
+
+model UpdateNote {
+  id          String   @id
+  title       String
+  body        String
+  tag         String
+  publishedAt DateTime
+}

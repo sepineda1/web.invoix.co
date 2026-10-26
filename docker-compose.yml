@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: invoix
+      POSTGRES_PASSWORD: invoix
+      POSTGRES_DB: invoix
+    ports:
+      - "5433:5432"
+    volumes:
+      - invoix_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U invoix -d invoix"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://invoix:invoix@db:5432/invoix?schema=public
+      AUTH_SECRET: invoix-dev-secret-cambia-esto-en-produccion-32
+      COOKIE_SECURE: "false"
+      ADMIN_EMAIL: admin@invoix.co
+      ADMIN_PASSWORD: InvoixAdmin2026!
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  invoix_pg:
